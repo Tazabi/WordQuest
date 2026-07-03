@@ -1,5 +1,6 @@
 from app import db, app
 from models import User, Test, Question, Word, test_word
+from werkzeug.security import generate_password_hash
 
 with app.app_context():
     # Очистка (осторожно: удалит все данные!)
@@ -41,5 +42,9 @@ with app.app_context():
     # Добавляем ещё вопросы на другие слова...
     db.session.add_all([q1, q2])
     db.session.commit()
+    user = User(email='cheesedestroyer3000@gmail.com', password_hash=generate_password_hash('ILikeMozarella'))
+    db.session.add(user)
+    db.session.commit()
+
 
     print("База данных заполнена тестовыми данными.")
