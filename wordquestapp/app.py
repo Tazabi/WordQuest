@@ -57,6 +57,21 @@ def load_user(user_id):
 def dashboard():
     return render_template('dashboard.html')
 
+@app.route('/tests')
+@login_required
+def tests_catalog():
+    return render_template('tests_catalog.html')  # Заглушка
+    
+@app.route('/wordbag')
+@login_required
+def wordbag():
+    return render_template('wordbag.html')  # Заглушка
+    
+@app.route('/stats')
+@login_required
+def stats():
+    return render_template('stats.html')  # Заглушка
+
 
 if __name__ == '__main__':
     app.run(debug=True)
