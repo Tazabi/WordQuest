@@ -1,0 +1,64 @@
+let currentQuestionIndex = 0;
+let correctCount = 0;
+let totalQuestions = 0;
+
+async function loadQuestion() {
+    const response = await fetch(`/test/{{ test.id }}/question/${currentQuestionIndex}`);
+    const data = await response.json();
+    if (data.finished) {
+        showResults(data.score, data.total, data.new_words);
+        return;
+    }
+    totalQuestions = data.total;
+    renderQuestion(data);
+}
+
+function renderQuestion(question) {
+    const container = document.getElementById('question-container');
+    let html = `<p class="lead">Вопрос ${question.index+1} из ${totalQuestions}</p>`;
+    html += `<h4>${question.prompt}</h4>`;
+    html += `<form id="answer-form">`;
+    question.options.forEach((opt, idx) => {
+        html += `<div class="form-check">
+            <input class="form-check-input" type="radio" name="answer" value="${opt}" id="opt${idx}">
+            <label class="form-check-label" for="opt${idx}">${opt}</label>
+        </div>`;
+    });
+    html += `<button type="submit" class="btn btn-success mt-3">Ответить</button>`;
+    html += `</form>`;
+    container.innerHTML = html;
+    document.getElementById('answer-form').addEventListener('submit', submitAnswer);
+}
+
+async function submitAnswer(e) {
+    e.preventDefault();
+    const selected = document.querySelector('input[name="answer"]:checked');
+    if (!selected) { alert('Выберите ответ'); return; }
+    const answer = selected.value;
+    const response = await fetch(`/test/{{ test.id }}/answer`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({question_index: currentQuestionIndex, answer: answer})
+    });
+    const result = await response.json();
+    if (result.correct) correctCount++;
+    if (result.next_question !== null) {
+        currentQuestionIndex = result.next_question;
+        loadQuestion();
+    } else {
+        showResults(correctCount, totalQuestions, result.new_words);
+    }
+}
+
+function showResults(score, total, newWords) {
+    const container = document.getElementById('question-container');
+    container.innerHTML = `
+        <h2>Тест завершён!</h2>
+        <p>Вы ответили правильно на ${score} из ${total} вопросов.</p>
+        <p>Выучено слов: ${newWords.join(', ')}</p>
+        <a href="/challenges" class="btn btn-primary">Вернуться к испытаниям</a>
+    `;
+}
+
+// Загрузка первого вопроса при открытии страницы
+loadQuestion();
