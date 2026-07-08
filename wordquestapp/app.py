@@ -38,7 +38,8 @@ app.register_blueprint(auth_blueprint, url_prefix='/')
 
 @app.route('/')
 def hello():
-    return '<h1>Hello, World!</h1>'
+    return '<h1>Hello, World!</h1>' \
+    '<a href="/dashboard">dashboard</a>'
 
 @app.route('/tests')
 def list_tests():
