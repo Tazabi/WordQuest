@@ -1,3 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+
+<script>
+
 let currentQuestionIndex = 0;
 let correctCount = 0;
 let totalQuestions = 0;
@@ -62,3 +67,7 @@ function showResults(score, total, newWords) {
 
 // Загрузка первого вопроса при открытии страницы
 loadQuestion();
+
+</script>
+
+{% endblock %}
