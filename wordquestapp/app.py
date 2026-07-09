@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, redirect
 from flask_sqlalchemy import SQLAlchemy
 from extensions import db
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
@@ -38,10 +38,9 @@ app.register_blueprint(auth_blueprint, url_prefix='/')
 
 @app.route('/')
 def hello():
-    return '<h1>Hello, World!</h1>' \
-    '<a href="/dashboard">dashboard</a>'
+    return redirect('/dashboard')
 
-@app.route('/tests')
+@app.route('/tests_debug')
 def list_tests():
     tests = Test.query.all()
     result = []
@@ -65,7 +64,7 @@ def dashboard():
 @app.route('/tests')
 @login_required
 def tests_catalog():
-    return render_template('tests_catalog.html')  # Заглушка
+    return redirect('/challenges')
     
 @app.route('/wordbag')
 @login_required
@@ -107,6 +106,7 @@ def get_question(test_id, question_index):
         return jsonify({'finished': True, 'score': ..., 'total': len(questions), 'new_words': [...]})
     q = questions[question_index]
     content = json.loads(q.content)  # предполагаем, что content – это JSON с 'options' и 'prompt'
+    print('[DEBUG]', content)
     return jsonify({
         'index': question_index,
         'prompt': content.get('prompt', 'Выберите перевод'),
