@@ -1,4 +1,5 @@
 from typing import Any
+from flask import jsonify
 
 class DataManager:
     def __init__(self, test_class: type, word_class: type, question_class: type):
@@ -75,12 +76,29 @@ class TestBuilder:
         
         self._commit_data(word)
 
-    def _format_content_string(self, args: tuple, prompt):
-        options = list(args)
-        content = '{"options": '
-        content += repr(options)
-        content += ', "prompt": '
-        content += f'"{prompt}"'
+    def _format_prompt(self, prompt: str):
+        prompt = prompt.replace("'", "\'")
+        prompt = prompt.replace('"', '\"')
+        return prompt
+    
+    def _format_options(self, options: tuple):
+        options = list(options)
+        options_string = '['
+        for i, o in enumerate(options):
+            if i != len(options) - 1:
+                options_string += '\"{}\", '.format(o)
+            else:
+                options_string += '\"{}\"], '.format(o)
+        return options_string
+
+    def _format_content_string(self, args: tuple, prompt: str):
+        options = self._format_options(args)
+        prompt = self._format_prompt(prompt)
+        content = "{"
+        content += '\"options\": '
+        content += options
+        content += '\"prompt\": '
+        content += '\"{}\"'.format(prompt)
         content += '}'
         return content
     
