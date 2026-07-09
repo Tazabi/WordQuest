@@ -144,7 +144,7 @@ def answer_question(test_id):
         progress_record.completed = True
         # Добавляем слова пользователю (из связи test.words)
         new_words = []
-        now = datetime.utcnow()
+        now = datetime.datetime.now()
         for word in test.words:
             # Проверяем, нет ли уже записи (чтобы не дублировать)
             existing = UserWord.query.filter_by(user_id=current_user.id, word_id=word.id).first()
