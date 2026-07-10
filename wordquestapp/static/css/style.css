@@ -1,0 +1,8 @@
+body {
+    background: #f5f9fc;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+.bg-dark {
+    --bs-bg-opacity: 1;
+    background-color: rgb(0 0 0) !important;
+}

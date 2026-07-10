@@ -1,0 +1,61 @@
+
+.card {
+    border: none;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+}
+
+.card-body {
+    padding: 1.6rem 1.4rem 1.4rem;
+    position: relative;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+
+/* ===== Кнопки ===== */
+.btn {
+    border-radius: 40px;
+    font-weight: 600;
+    padding: 0.5rem 1.8rem;
+    transition: all 0.2s;
+    border: none;
+    font-size: 0.95rem;
+}
+/* Доступные тесты — зелёная кнопка */
+.btn-primary {
+    background: #22c55e;
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(34, 197, 94, 0.25);
+}
+.btn-primary:hover {
+    background: #16a34a;
+    transform: scale(1.03);
+    box-shadow: 0 6px 14px rgba(34, 197, 94, 0.35);
+}
+.btn-primary:active {
+    transform: scale(0.97);
+}
+
+/* Заблокированные — серая кнопка */
+.btn-secondary:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 1;
+}

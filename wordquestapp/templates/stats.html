@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Статистика{% endblock %}
 {% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/stats.css') }}">
+
 <h1>Статистика</h1>
 <p>На этой странице будет отображаться статистика вашего обучения.</p>
 {% endblock %}
