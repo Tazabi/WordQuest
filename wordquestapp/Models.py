@@ -15,6 +15,7 @@ class User(db.Model, UserMixin):
     user_words = db.relationship('UserWord', backref='user', lazy=True)
     test_progress = db.relationship('UserTestProgress', backref='user', lazy=True)
 
+last_activity_date = db.Column(db.Date, nullable=True)  # дата последней активности для стрика
 
 class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
