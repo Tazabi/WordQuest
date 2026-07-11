@@ -1,16 +1,12 @@
 import os
-from flask import Flask, redirect, flash, url_for
-from flask_sqlalchemy import SQLAlchemy
-from extensions import db
+from flask import Flask, session, redirect, flash, url_for, render_template, request, jsonify
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
-import secrets
-from flask import render_template
-import json
-from flask import session
-from datetime import timedelta, datetime
-from flask import request, jsonify
-import random
+from flask_sqlalchemy import SQLAlchemy
 
+from extensions import db
+import secrets
+import json
+from datetime import timedelta, datetime
 from utils import calculate_next_review, update_streak, time_ago
 import random
 
