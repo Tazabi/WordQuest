@@ -1,5 +1,5 @@
 import os
-from flask import Flask, redirect
+from flask import Flask, redirect, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
 from extensions import db
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
@@ -7,9 +7,12 @@ import secrets
 from flask import render_template
 import json
 from flask import session
-from datetime import timedelta
+from datetime import timedelta, datetime
 from flask import request, jsonify
-import datetime
+import random
+
+from utils import calculate_next_review, update_streak, time_ago
+import random
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -69,7 +72,31 @@ def tests_catalog():
 @app.route('/wordbag')
 @login_required
 def wordbag():
-    return render_template('wordbag.html')  # Заглушка
+    user_words = UserWord.query.filter_by(user_id=current_user.id).all()
+    # Подготовим данные для отображения: слово, перевод, ранг, last_review в виде "X часов назад"
+    words_data = []
+    now = datetime.utcnow()
+    for uw in user_words:
+        time_diff = now - uw.last_review
+        hours_ago = time_diff.total_seconds() / 3600
+        if hours_ago < 1:
+            ago_str = "меньше часа назад"
+        elif hours_ago < 24:
+            ago_str = f"{int(hours_ago)} ч. назад"
+        else:
+            days_ago = int(hours_ago / 24)
+            ago_str = f"{days_ago} дн. назад"
+        words_data.append({
+            'word': uw.word.english,
+            'translation': uw.word.russian,
+            'rank': uw.rank,
+            'last_review': ago_str,
+            'need_review': uw.next_review <= now  # пора повторять?
+        })
+    # Есть ли слова, доступные для повторения?
+    has_due = any(w['need_review'] for w in words_data)
+    return render_template('wordbag.html', words=words_data, has_due=has_due)
+
     
 @app.route('/stats')
 @login_required
@@ -164,6 +191,88 @@ def answer_question(test_id):
         session['test_progress'] = progress
         next_idx = question_index + 1
         return jsonify({'correct': correct, 'next_question': next_idx, 'finished': False})
+
+@app.route('/training')
+@login_required
+def training():
+    now = datetime.utcnow()
+    due_words = UserWord.query.filter_by(user_id=current_user.id).filter(UserWord.next_review <= now).limit(20).all()
+    if not due_words:
+        flash('Нет слов для повторения.')
+        return redirect(url_for('wordbag'))
+    # Перемешиваем и сохраняем ID
+    random.shuffle(due_words)
+    session['training_words'] = [uw.id for uw in due_words]
+    session['training_index'] = 0
+    session['training_correct'] = 0
+    return render_template('training.html', first_word=due_words[0])
+
+@app.route('/process_training', methods=['POST'])
+@login_required
+def process_training():
+    if 'training_words' not in session:
+        return jsonify({'error': 'Сессия тренировки не найдена'}), 400
+    word_ids = session['training_words']
+    current_index = session['training_index']
+    if current_index >= len(word_ids):
+        return jsonify({'finished': True})  # на всякий случай
+
+    data = request.get_json()
+    user_answer = data.get('answer', '').strip().lower()
+
+    uw_id = word_ids[current_index]
+    user_word = UserWord.query.get(uw_id)
+    word = user_word.word
+    correct_answer = word.english.lower()
+    is_correct = (user_answer == correct_answer)
+
+    # Вычисляем время с последнего повторения
+    now = datetime.utcnow()
+    time_since = (now - user_word.last_review).total_seconds() / 3600.0
+    new_rank, new_interval = calculate_next_review(user_word.rank, is_correct, time_since)
+
+    # Обновляем запись
+    user_word.rank = new_rank
+    user_word.last_review = now
+    user_word.next_review = now + timedelta(hours=new_interval)
+    user_word.times_reviewed += 1
+    db.session.commit()
+
+    if is_correct:
+        session['training_correct'] += 1
+
+    # Переходим к следующему слову
+    session['training_index'] = current_index + 1
+    next_index = session['training_index']
+
+    if next_index >= len(word_ids):
+        # Завершение тренировки
+        score = session['training_correct']
+        total = len(word_ids)
+        # Обновление стрика
+        update_streak(current_user)
+        # Очистка сессии
+        session.pop('training_words', None)
+        session.pop('training_index', None)
+        session.pop('training_correct', None)
+        return jsonify({
+            'finished': True,
+            'score': score,
+            'total': total,
+            'streak': current_user.streak,
+            'message': f'Вы ответили правильно на {score} из {total}. Стрик: {current_user.streak} дн.'
+        })
+    else:
+        next_word = UserWord.query.get(word_ids[next_index]).word
+        return jsonify({
+            'finished': False,
+            'correct': is_correct,
+            'next_word': {
+                'russian': next_word.russian,
+                'id': next_word.id
+            }
+        })
+    
 
 if __name__ == '__main__':
     app.run(debug=True)

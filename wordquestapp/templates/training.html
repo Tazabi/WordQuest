@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Тренировка</h1>
+<div id="training-container">
+  <p>Перевод: <strong>{{ first_word.word.russian }}</strong></p>
+  <input type="text" id="user-answer" class="form-control" placeholder="Введите английское слово">
+  <button id="submit-answer" class="btn btn-success mt-2">Ответить</button>
+  <p id="feedback"></p>
+</div>
+<script>
+  const trainingUrl = "{{ url_for('process_training') }}";
+  // JS-код для отправки ответа и получения следующего слова (похож на тесты)
+  // При ответе: собираем answer, отправляем POST, получаем JSON с полями:
+  // { correct: bool, finished: bool, next_word?: { russian: str }, score?: int, total?: int }
+  // Обновляем интерфейс.
+</script>
+{% endblock %}

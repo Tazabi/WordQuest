@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, date
 
-
 def calculate_next_review(current_rank, is_correct, time_since_last_review_hours):
     # 1. Вычисляем порог просрочки
     # Ранг 0 — порог 0 часов (всегда просрочено, но это крайний случай)

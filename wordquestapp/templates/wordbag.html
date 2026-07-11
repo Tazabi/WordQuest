@@ -1,9 +1,29 @@
 {% extends "base.html" %}
-{% block title %}Испытания{% endblock %}
 {% block content %}
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/wordbag.css') }}">
 
 <h1>Мешок слов</h1>
-<p>Здесь пока пусто. Но скоро что-то будет.</p>
+{% if words %}
+  <table class="table">
+    <thead><tr><th>Слово</th><th>Перевод</th><th>Ранг</th><th>Повторено</th></tr></thead>
+    <tbody>
+      {% for w in words %}
+        <tr>
+          <td>{{ w.word }}</td>
+          <td>{{ w.translation }}</td>
+          <td>{{ w.rank }}</td>
+          <td>{{ w.last_review }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if has_due %}
+    <a href="{{ url_for('training') }}" class="btn btn-primary">Тренироваться</a>
+  {% else %}
+    <p>Пока нет слов для повторения.</p>
+  {% endif %}
+{% else %}
+  <p>Вы ещё не изучили ни одного слова. Пройдите тесты!</p>
+{% endif %}
 {% endblock %}

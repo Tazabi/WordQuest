@@ -10,12 +10,13 @@ class User(db.Model, UserMixin):
     last_login = db.Column(db.DateTime, default=datetime.utcnow)
     streak = db.Column(db.Integer, default=0)
     max_streak = db.Column(db.Integer, default=0)
+    last_activity_date = db.Column(db.Date, nullable=True)  # дата последней активности для стрика
 
     # Связи с прогрессом
     user_words = db.relationship('UserWord', backref='user', lazy=True)
     test_progress = db.relationship('UserTestProgress', backref='user', lazy=True)
 
-last_activity_date = db.Column(db.Date, nullable=True)  # дата последней активности для стрика
+
 
 class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
