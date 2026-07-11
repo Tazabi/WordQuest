@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, date
 
+
 def calculate_next_review(current_rank, is_correct, time_since_last_review_hours):
-   
     # 1. Вычисляем порог просрочки
     # Ранг 0 — порог 0 часов (всегда просрочено, но это крайний случай)
     # Ранг 50 — порог 2400 часов (100 дней)
@@ -28,7 +28,7 @@ def calculate_next_review(current_rank, is_correct, time_since_last_review_hours
     new_interval_hours = 12 * (new_rank * 2)
 
     return new_rank, new_interval_hours
-    
+
 def update_streak(user):
     today = date.today()
     changed = False
@@ -64,7 +64,9 @@ def update_streak(user):
     user.last_activity_date = today
     return changed  # True, если было изменение
 
+
 def time_ago(past_datetime, now=None):
+
     if now is None:
         now = datetime.utcnow()
 
@@ -141,4 +143,4 @@ if __name__ == "__main__":
     print("  update_streak(u)")
     print("  db.session.commit()")
 
-    print("\n=== Все тесты пройдены ===")turn 
+    print("\n=== Все тесты пройдены ===")
