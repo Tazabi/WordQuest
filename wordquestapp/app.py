@@ -93,7 +93,6 @@ def wordbag():
     has_due = any(w['need_review'] for w in words_data)
     return render_template('wordbag.html', words=words_data, has_due=has_due)
 
-    
 @app.route('/stats')
 @login_required
 def stats():

@@ -1,3 +1,8 @@
+.dashboard {
+    padding: 2rem;
+    background-color: #f5f9fc;
+    min-height: 100vh;
+}
 
 .card {
     border: none;
@@ -36,7 +41,6 @@
     border: none;
     font-size: 0.95rem;
 }
-/* Доступные тесты — зелёная кнопка */
 .btn-primary {
     background: #22c55e;
     color: #fff;
@@ -51,11 +55,3 @@
     transform: scale(0.97);
 }
 
-/* Заблокированные — серая кнопка */
-.btn-secondary:disabled {
-    background: #e2e8f0;
-    color: #94a3b8;
-    box-shadow: none;
-    cursor: not-allowed;
-    opacity: 1;
-}
