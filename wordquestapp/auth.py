@@ -5,6 +5,7 @@ from extensions import db
 from models import User
 from forms import RegistrationForm, LoginForm
 from datetime import datetime
+from utils import reset_streak_if_missed
 
 auth = Blueprint('auth', __name__)
 
@@ -31,13 +32,15 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and check_password_hash(user.password_hash, form.password.data):
             login_user(user, remember=True)
-            user.last_login = datetime.utcnow()
+            user.last_login = datetime.utcnow()  # остаётся для аудита
+            reset_streak_if_missed(user)        # сброс стрика при пропуске дня
             db.session.commit()
             next_page = request.args.get('next')
             return redirect(next_page or url_for('dashboard'))
         else:
             flash('Неправильный email или пароль')
     return render_template('login.html', form=form)
+
 
 @auth.route('/logout')
 @login_required

@@ -10,6 +10,8 @@ from datetime import timedelta, datetime
 from utils import calculate_next_review, update_streak, time_ago
 import random
 
+from utils import update_streak
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
@@ -96,7 +98,13 @@ def wordbag():
 @app.route('/stats')
 @login_required
 def stats():
-    return render_template('stats.html')  # Заглушка
+    completed_tests = UserTestProgress.query.filter_by(user_id=current_user.id, completed=True).count()
+    words_count = UserWord.query.filter_by(user_id=current_user.id).count()
+    return render_template('stats.html',
+                           streak=current_user.streak,
+                           max_streak=current_user.max_streak,
+                           completed_tests=completed_tests,
+                           words_count=words_count)
 
 @app.route('/challenges')
 @login_required
@@ -176,7 +184,10 @@ def answer_question(test_id):
                                     next_review=now + timedelta(hours=12))
                 db.session.add(new_word)
                 new_words.append(word.english)
-        db.session.commit()
+                
+                db.session.commit()  # сохранение прогресса теста и слов
+                update_streak(current_user)
+                db.session.commit()
         # Очищаем прогресс в сессии
         session.pop('test_progress', None)
         return jsonify({'correct': correct, 'next_question': None, 'finished': True,
@@ -186,6 +197,7 @@ def answer_question(test_id):
         session['test_progress'] = progress
         next_idx = question_index + 1
         return jsonify({'correct': correct, 'next_question': next_idx, 'finished': False})
+        
 
 @app.route('/training')
 @login_required
@@ -239,7 +251,6 @@ def process_training():
     # Переходим к следующему слову
     session['training_index'] = current_index + 1
     next_index = session['training_index']
-
     if next_index >= len(word_ids):
         # Завершение тренировки
         score = session['training_correct']
@@ -250,6 +261,10 @@ def process_training():
         session.pop('training_words', None)
         session.pop('training_index', None)
         session.pop('training_correct', None)
+        
+        update_streak(current_user)
+        db.session.commit()
+        
         return jsonify({
             'finished': True,
             'score': score,
@@ -267,7 +282,7 @@ def process_training():
                 'id': next_word.id
             }
         })
-    
+
 
 if __name__ == '__main__':
     app.run(debug=True)

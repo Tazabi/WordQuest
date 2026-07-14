@@ -4,6 +4,41 @@
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/stats.css') }}">
 
-<h1>Статистика</h1>
-<p>На этой странице будет отображаться статистика вашего обучения.</p>
+<h1>Ваш прогресс</h1>
+<div class="row mt-4">
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title">Текущий стрик</h5>
+        <p class="display-4">{{ streak }} 🔥</p>
+        <p class="text-muted">дней подряд</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title">Рекордный стрик</h5>
+        <p class="display-4">{{ max_streak }} ⭐</p>
+        <p class="text-muted">лучшая серия</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title">Пройдено тестов</h5>
+        <p class="display-4">{{ completed_tests }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title">Слов в мешке</h5>
+        <p class="display-4">{{ words_count }}</p>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

@@ -30,38 +30,17 @@ def calculate_next_review(current_rank, is_correct, time_since_last_review_hours
 
 def update_streak(user):
     today = date.today()
-    changed = False
-
-    # Первая активность — инициализируем все поля
-    if user.last_activity_date is None:
-        user.streak = 1
-        user.max_streak = max(user.max_streak or 0, 1)
-        user.last_activity_date = today
-        return True  # точно изменили
-
-    # Уже была активность сегодня — не учитываем повторно
     if user.last_activity_date == today:
-        return False  # ничего не изменилось
-
-    # Вычисляем разницу в днях между сегодня и последней активностью
-    delta = (today - user.last_activity_date).days
-
-    if delta == 1:
-        # Активность была вчера — продолжаем стрик
+        return  # уже увеличивали сегодня
+    # Если last_activity_date вчера или раньше — увеличиваем стрик
+    if user.last_activity_date is None or (today - user.last_activity_date).days >= 1:
         user.streak += 1
-        changed = True
     else:
-        # Перерыв больше 1 дня — начинаем заново
+        # Если вдруг last_activity_date > today (будущее) — маловероятно, но на всякий случай
         user.streak = 1
-        changed = True
-
-    # Обновляем максимальный стрик, если текущий побил рекорд
-    if user.streak > (user.max_streak or 0):
-        user.max_streak = user.streak
-
-    # Фиксируем сегодняшнюю дату
     user.last_activity_date = today
-    return changed  # True, если было изменение
+    if user.streak > user.max_streak:
+        user.max_streak = user.streak
 
 
 def time_ago(past_datetime, now=None):
@@ -89,7 +68,16 @@ def time_ago(past_datetime, now=None):
     else:
         return "давно"
 
-
+def reset_streak_if_missed(user):
+    if user.last_activity_date is None:
+        return  # ещё не было активностей, стрик 0
+    today = date.today()
+    days_passed = (today - user.last_activity_date).days
+    if days_passed > 1:
+        user.streak = 0
+    # Если дни_passed == 1, стрик сохраняется (вчера была активность)
+    # Если days_passed == 0, сегодня уже была активность – ничего не делаем
+    
 # ========== Тесты (можно запустить: python utils.py) ==========
 if __name__ == "__main__":
     print("=== Тесты calculate_next_review ===\n")
