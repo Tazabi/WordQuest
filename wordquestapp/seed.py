@@ -2,6 +2,13 @@ from app import db, app
 from models import User, Test, Question, Word, UserTestProgress, UserWord
 from werkzeug.security import generate_password_hash
 from auxiliaries.data_manager import DataManager, TestBuilder
+from auxiliaries.library.dictionary import VERB_DICTIONARY as VDICT
+from auxiliaries.library.dictionary import NOUN_DICTIONARY as NDICT
+from auxiliaries.library.dictionary import ADJ_DICTIONARY as ADICT
+from auxiliaries.library.dictionary import GRAMMAR_DICT as GDICT
+from auxiliaries.library.challenge_info import TOBE1, THIS1
+from auxiliaries.library.challenge_data import VERB_FORMS as VFORMS
+from auxiliaries.library.challenge_data import GRAMMAR as GR
 
 DM = DataManager(Test, Word, Question)
 
@@ -13,69 +20,29 @@ with app.app_context():
     db.drop_all()
     db.create_all()
 
+    # Инициализация тестов (при помощи класса TestBuilder)
     (
         TestBuilder(DM, db.session)
         .create_test("TO BE: Глагол-связка",
                      "Elementary",
                      "Verbs",
                      1)
-        .add_word("am", "являюсь", "verb-irr")
-        .add_word("are", "являетесь", "verb-irr")
-        .add_word("is", "является", "verb-irr")
-        .add_word("next", "следующий", "adj")
-        .add_word("continue", "продолжить", "verb")
-        .add_question_choice(
-            NEXT,
-            prompt="Нажми 'next' чтобы продолжить. 'next' значит 'далее'."
-        )
-        .add_question_choice(
-            "My name is (...)",
-            prompt="Отлично! Теперь ты знаешь свое первое слово. Теперь представься. Подставь своё имя вместо точек, мысленно."
-        )
-        .add_question_choice(
-            NEXT,
-            prompt="Супер! Теперь ты знаешь как представиться. Запомни: мы используем 'is' потому что слово 'name' (имя) единственного числа. Теперь, давай тренироваться."
-        )
-        .add_question_choice(
-            "I am (...)",
-            prompt="Ты можешь сказать 'Меня зовут ...' иначе. Для этого скажи..."
-        )
-        .add_question_choice(
-            NEXT,
-            prompt="Мы сейчас работаем с разными формами глагола TO BE (быть). Он особенный, но очень важный."
-        )
-        .add_question_choice(
-            "I am Alex. / He is Alex. / This cat is Tom.",
-            prompt="Запомни. С местоимением I (я) мы используем TO BE в форме 'am'. С существительными и местоимениями единственного числа - 'is'."
-        )
-        .add_question_choice(
-            "We are friends. / They are students. / You are cool.",
-            prompt="Когда чего-то много, мы в настоящем времени используем 'are'. Запомни, что 'you' (ты/вы) в английском во множественном числе. Он просто так устроен."
-        )
-        .add_question_choice(
-            NEXT,
-            prompt="Теперь, давай практиковаться."
-        )
-        .add_question_choice(
-            "am", "is", "are",
-            prompt="Какой глагол подставить в: I (???) Alex ?",
-            correct=0
-        )
-        .add_question_choice(
-            "am", "is", "are",
-            prompt="Какой глагол подставим в: He/She/It (???) Alex ?",
-            correct=1
-        )
-        .add_question_choice(
-            "am", "is", "are",
-            prompt="Какой глагол подставим в: You (???) Alex ?",
-            correct=2
-        )
-        .add_question_choice(
-            "am", "is", "are",
-            prompt="Какой глагол подставим в: They (???) students ?",
-            correct=2
-        ) 
+        .batch_words(VDICT, ['am', 'are', 'is', 'continue'])
+        .batch_words(ADICT, ['cool', 'nice'])
+        .word(**NDICT['students'])
+        .qbatch_info(TOBE1)
+        .qbatch_choice(VFORMS, ['am0', 'is1', 'are0', 'are2'])
+    )
+
+    (
+        TestBuilder(DM, db.session)
+        .create_test("Первые TH: This / These",
+                     "Elementary",
+                     "Grammar",
+                     order=1)
+        .batch_words(GDICT, ['this1', 'this2', 'these1'])
+        .qbatch_info(THIS1)
+        .qbatch_choice(GR, ['this0', 'these2', 'these1', 'this2'])
     )
 
     user = User(email='cheesedestroyer3000@gmail.com', password_hash=generate_password_hash('ILikeMozarella'))

@@ -50,6 +50,22 @@ class TestBuilder:
     def _commit_several(self, objects: list):
         self.session.add_all(objects)
         self.session.commit()
+
+    def batch_words(self, category: dict, words: list[str]):
+        """Добавить несколько слов из указанного словаря (category) по ключам из списка (words)"""
+        for word in words:
+            w = category.get(word, None)
+            if w:
+                self = self.word(**w)
+        return self
+
+    def word(self, **kwargs):
+        return self.word_from_dict(word_en=kwargs.get('word_en', "none"), 
+                                   word_ru=kwargs.get('word_ru', 'нет'), 
+                                   pos=kwargs.get('pos', 'none'))
+
+    def word_from_dict(self, word_en="none", word_ru="none", pos="unk"):
+        return self.add_word(word_en, word_ru, pos=pos)
     
     def add_word(self, word_en, word_ru, pos="unk"):
         if not self.test:
@@ -107,6 +123,36 @@ class TestBuilder:
             return args[0]
         
         return args[correct]
+    
+    def qbatch_choice(self, category: dict, qlist: list[str]):
+        """Добавить несколько вопросов с выбором ответа из категории (category), по ключам из списка (qlist)"""
+        for item in qlist:
+            question = category.get(item, None)
+            if question:
+                self = self.q_choice(**question)
+        return self
+    
+    def q_choice(self, **kwargs):
+        options = kwargs.get('options', list())
+        options = list(options)
+        prompt = kwargs.get('prompt', "Текст вопроса отсутствует")
+        correct = kwargs.get('correct', 0)
+        return self.add_question_choice(*options, prompt=prompt, correct=correct)
+    
+    def qbatch_info(self, category: list):
+        """Добавить множественные вопросы типа Информация из категории (category), представленной в виде списка кортежей, на первом месте промт, на втором ответ."""
+        for question in category:
+            if not isinstance(question, tuple):
+                continue
+            if not len(question) == 2:
+                continue
+            self = self.q_info(question[0], question[1])
+        return self
+
+    def q_info(self, prompt, option):
+        return self.add_question_choice(
+            option, prompt=prompt
+        )
 
     def add_question_choice(self, *args, prompt="Текст вопроса", correct=0):
         if not self.test:
