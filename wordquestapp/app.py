@@ -84,9 +84,13 @@ def wordbag():
         else:
             days_ago = int(hours_ago / 24)
             ago_str = f"{days_ago} дн. назад"
+
+        word_data = db.session.get(Word, uw.word_id)
+        # Получаем информацию про само слово
+        
         words_data.append({
-            'word': uw.word.english,
-            'translation': uw.word.russian,
+            'word': word_data.english,
+            'translation': word_data.russian,
             'rank': uw.rank,
             'last_review': ago_str,
             'need_review': uw.next_review <= now  # пора повторять?
@@ -174,7 +178,7 @@ def answer_question(test_id):
         progress_record.completed = True
         # Добавляем слова пользователю (из связи test.words)
         new_words = []
-        now = datetime.datetime.now()
+        now = datetime.now()
         for word in test.words:
             # Проверяем, нет ли уже записи (чтобы не дублировать)
             existing = UserWord.query.filter_by(user_id=current_user.id, word_id=word.id).first()
