@@ -2,16 +2,69 @@
 {% block content %}
 <h1>Тренировка</h1>
 <div id="training-container">
-  <p>Перевод: <strong>{{ first_word.word.russian }}</strong></p>
+  <p>Перевод: <strong>{{ russian }}</strong></p>
   <input type="text" id="user-answer" class="form-control" placeholder="Введите английское слово">
   <button id="submit-answer" class="btn btn-success mt-2">Ответить</button>
   <p id="feedback"></p>
 </div>
+<input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
 <script>
   const trainingUrl = "{{ url_for('process_training') }}";
-  // JS-код для отправки ответа и получения следующего слова (похож на тесты)
-  // При ответе: собираем answer, отправляем POST, получаем JSON с полями:
-  // { correct: bool, finished: bool, next_word?: { russian: str }, score?: int, total?: int }
-  // Обновляем интерфейс.
+  const csrfToken = document.getElementById('csrf_token').value;
+
+  document.getElementById('submit-answer').addEventListener('click', async () => {
+    const answerInput = document.getElementById('user-answer');
+    const answer = answerInput.value.trim();
+    if (!answer) {
+      alert('Введите ответ');
+      return;
+    }
+
+    const response = await fetch(trainingUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify({ answer: answer })
+    });
+
+    if (!response.ok) {
+      alert('Ошибка сервера');
+      return;
+    }
+
+    const data = await response.json();
+    const feedback = document.getElementById('feedback');
+
+    if (data.finished) {
+      // Тренировка завершена
+      document.getElementById('training-container').innerHTML = `
+        <h2>Тренировка завершена!</h2>
+        <p>${data.message}</p>
+        <a href="/wordbag" class="btn btn-primary">Вернуться в мешок слов</a>
+      `;
+    } else {
+      // Показываем результат и загружаем следующее слово
+      feedback.textContent = data.correct ? '✅ Правильно!' : '❌ Неправильно';
+      feedback.className = data.correct ? 'text-success' : 'text-danger';
+
+      // Обновляем слово для следующего вопроса
+      const russianElem = document.querySelector('#training-container p strong');
+      if (russianElem && data.next_word) {
+        russianElem.textContent = data.next_word.russian;
+      }
+      // Очищаем поле ввода
+      answerInput.value = '';
+      answerInput.focus();
+    }
+  });
+
+  // Опционально: отправка по Enter
+  document.getElementById('user-answer').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      document.getElementById('submit-answer').click();
+    }
+  });
 </script>
 {% endblock %}

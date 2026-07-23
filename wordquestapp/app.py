@@ -2,6 +2,7 @@ import os
 from flask import Flask, session, redirect, flash, url_for, render_template, request, jsonify
 from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 
 from extensions import db
 import secrets
@@ -9,8 +10,6 @@ import json
 from datetime import timedelta, datetime
 from utils import calculate_next_review, update_streak, time_ago
 import random
-
-from utils import update_streak
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -22,7 +21,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'wo
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # отключает предупреждения
 app.config['SECRET_KEY'] = secrets.token_hex(16)
 
-
+csrf = CSRFProtect(app)
 
 db.init_app(app)
 # Инициализация Flask-Login
@@ -216,7 +215,9 @@ def training():
     session['training_words'] = [uw.id for uw in due_words]
     session['training_index'] = 0
     session['training_correct'] = 0
-    return render_template('training.html', first_word=due_words[0])
+    first_uw = due_words[0]
+    first_word = db.session.get(Word, first_uw.word_id)
+    return render_template('training.html', first_word=first_uw, russian=first_word.russian)
 
 @app.route('/process_training', methods=['POST'])
 @login_required
@@ -233,7 +234,7 @@ def process_training():
 
     uw_id = word_ids[current_index]
     user_word = UserWord.query.get(uw_id)
-    word = user_word.word
+    word = db.session.get(Word, user_word.word_id) 
     correct_answer = word.english.lower()
     is_correct = (user_answer == correct_answer)
 
@@ -277,16 +278,16 @@ def process_training():
             'message': f'Вы ответили правильно на {score} из {total}. Стрик: {current_user.streak} дн.'
         })
     else:
-        next_word = UserWord.query.get(word_ids[next_index]).word
+        user_word = UserWord.query.get(word_ids[next_index])
+        next_word = db.session.get(Word, user_word.word_id)
         return jsonify({
             'finished': False,
             'correct': is_correct,
             'next_word': {
                 'russian': next_word.russian,
-                'id': next_word.id
+                'id': user_word.id
             }
         })
-
 
 if __name__ == '__main__':
     app.run(debug=True)
