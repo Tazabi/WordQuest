@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <div id="question-container"></div>
 
 <script>
@@ -42,11 +44,16 @@
         const selected = document.querySelector('input[name="answer"]:checked');
         if (!selected) { alert('Выберите ответ'); return; }
         const answer = selected.value;
+
         const response = await fetch(`/test/{{ test.id }}/answer`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
             body: JSON.stringify({question_index: currentQuestionIndex, answer: answer})
         });
+
         const result = await response.json();
         if (result.correct) correctCount++;
         if (result.next_question !== null) {
