@@ -165,6 +165,70 @@ GRAMMAR = (
         ),
         correct=0
     )
+    .add(
+        "this3",
+        (
+            Prompt()
+            .ru("Это наш учитель. Он умный.")
+            .en("This ___ our teacher. He ___ smart.")
+            .build()
+        ),
+        (
+            Tray()
+            .add("is")
+            .add("are")
+            .build()
+        ),
+        correct=1
+    )
+    .add(
+            "this4",
+            (
+                Prompt()
+                .ru("Это моя мама. Она добрая.")
+                .en("This ___ my mother. She ___ kind.")
+                .build()
+            ),
+            (
+                Tray()
+                .add("am")
+                .add("is")
+                .build()
+            ),
+            correct=2
+    )
+    .add(
+            "these3",
+            (
+                Prompt()
+                .ru("Это мои ученики. Они смелые.")
+                .en("These ___ my students. They ___ brave.")
+                .build()
+            ),
+            (
+                Tray()
+                .add("are")
+                .add("am")
+                .build()
+            ),
+            correct=1
+    )
+    .add(
+            "these4",
+            (
+                Prompt()
+                .ru("Вместе мы сильные.")
+                .en("Together we ___ strong.")
+                .build()
+            ),
+            (
+                Tray()
+                .add("is")
+                .add("are")
+                .build()
+            ),
+            correct=2
+    )
     .build()
 )
 

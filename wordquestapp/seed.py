@@ -6,7 +6,7 @@ from auxiliaries.library.dictionary import VERB_DICTIONARY as VDICT
 from auxiliaries.library.dictionary import NOUN_DICTIONARY as NDICT
 from auxiliaries.library.dictionary import ADJ_DICTIONARY as ADICT
 from auxiliaries.library.dictionary import GRAMMAR_DICT as GDICT
-from auxiliaries.library.challenge_info import TOBE1, THIS1
+from auxiliaries.library.challenge_info import TOBE1, THIS1, TOBE2
 from auxiliaries.library.challenge_data import VERB_FORMS as VFORMS
 from auxiliaries.library.challenge_data import GRAMMAR as GR
 
@@ -39,10 +39,23 @@ with app.app_context():
         .create_test("Первые TH: This / These",
                      "Elementary",
                      "Grammar",
-                     order=1)
+                     2)
         .batch_words(GDICT, ['this1', 'this2', 'these1'])
         .qbatch_info(THIS1)
         .qbatch_choice(GR, ['this0', 'these2', 'these1', 'this2'])
+    )
+
+    (
+        TestBuilder(DM, db.session)
+        .create_test("IS / AM / ARE",
+                     "Elementary",
+                     "Verbs",
+                     3)
+        .batch_words(VDICT, ["am", "is", "are"])
+        .batch_words(NDICT, ['teacher', 'student'])
+        .batch_words(ADICT, ['strong', 'brave', 'smart', 'kind'])
+        .qbatch_info(TOBE2)
+        .qbatch_choice(GR, ['this3', 'this4', 'these3', 'these4'])
     )
 
     user = User(email='cheesedestroyer3000@gmail.com', password_hash=generate_password_hash('ILikeMozarella'))

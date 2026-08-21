@@ -133,13 +133,18 @@ class TestBuilder:
         return self
     
     def q_choice(self, **kwargs):
-        options = kwargs.get('options', list())
+        """Принимает словарь с аргументами options, prompt и correct, где options - это список слов, prompt - это текст вопроса, а correct - это """
+        options = kwargs.get('options', [])
         options = list(options)
         prompt = kwargs.get('prompt', "Текст вопроса отсутствует")
         correct = kwargs.get('correct', 0)
         return self.add_question_choice(*options, prompt=prompt, correct=correct)
+
+    def qbatch_arginfo(self, *args):
+        """Добавить множественные вопросы типа Информация. Принимает кортежи из двух элементов, на первом месте стоит вопрос, на втором - ответ"""
+        return self.qbatch_info([arg for arg in args if isinstance(arg, tuple)])
     
-    def qbatch_info(self, category: list):
+    def qbatch_info(self, category: list[tuple]):
         """Добавить множественные вопросы типа Информация из категории (category), представленной в виде списка кортежей, на первом месте промт, на втором ответ."""
         for question in category:
             if not isinstance(question, tuple):

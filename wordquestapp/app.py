@@ -34,6 +34,7 @@ login_manager.login_view = 'auth.login'
 
 from models import User, Test, Question, Word, UserWord, UserTestProgress
 from auth import auth as auth_blueprint
+
 app.register_blueprint(auth_blueprint, url_prefix='/')
 
 @app.route('/')
@@ -114,12 +115,19 @@ def stats():
 def challenges():
     tests = Test.query.order_by(Test.level, Test.order).all()
     completed_set = {t.test_id for t in UserTestProgress.query.filter_by(user_id=current_user.id, completed=True).all()}
+    completed_order_set = set()
+    for test_id in completed_set:
+        completed_test = Test.query.filter_by(id=test_id).one_or_none()
+        if completed_test:
+            completed_order_set.add(completed_test.order)
+    print(completed_order_set)
     # Определим доступность: если order==1, или (order-1) есть в completed_set
     accessible = []
     for t in tests:
-        accessible.append(t.order == 1 or (t.order - 1) in completed_set)
+        if t.order == 1 or (t.order - 1) in completed_order_set:
+            accessible.append(t.id)
     return render_template('challenges.html', tests=tests,
-                           completed=completed_set,
+                           completed=completed_order_set,
                            accessible=accessible)
 
 @app.route('/test/<int:test_id>')

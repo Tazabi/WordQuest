@@ -91,6 +91,42 @@ ADJ_DICTIONARY = (
             .build()
         )
     )
+    .add(
+        (
+            DictWord()
+            .eng("strong")
+            .ru("сильный / крепкий")
+            .pos(ADJ)
+            .build()
+        )
+    )
+    .add(
+            (
+                DictWord()
+                .eng("brave")
+                .ru("смелый / отважный")
+                .pos(ADJ)
+                .build()
+            )
+    )
+    .add(
+            (
+                DictWord()
+                .eng("smart")
+                .ru("умный / хитрый")
+                .pos(ADJ)
+                .build()
+            )
+    )
+    .add(
+            (
+                DictWord()
+                .eng("kind")
+                .ru("добрый / хороший")
+                .pos(ADJ)
+                .build()
+            )
+    )
     .build()
 )
 

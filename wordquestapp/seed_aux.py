@@ -18,7 +18,6 @@ CONTINUE = 'continue'
 with app.app_context():
 
     # Добавляем новые тесты
-    
 
     # 1. Все тесты с их уровнями и порядком
     tests = Test.query.all()
