@@ -1,0 +1,10 @@
+WordQuest
+
+Как запустить проект:
+- Установить Python версии 3.13 и выше, SQLAlchemy, Flask и зависимости:
+
+```
+pip install flask, flask_login, flask_wtf
+```
+
+- Запустить сайт, выполнив файл app.py или компилировать проект.
